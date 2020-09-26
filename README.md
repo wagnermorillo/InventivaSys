@@ -1,2 +1,2 @@
 # INVENTARY
-inventary software for company
+inventory software for bussines
