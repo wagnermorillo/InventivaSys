@@ -47,7 +47,7 @@ import mysql.connector
 dbConnect = {
     "host": "localhost",
     "user": "root",
-    "password": "12345678",
+    "password": "1234",
     "database": "inventary"
 }
 
@@ -55,8 +55,9 @@ connection = mysql.connector.connect(**dbConnect)
 cursor = connection.cursor()
 
 
+# WINDOW AND OPTIONS FOT ADD A NEW PRODUCTS
 def add_products(product,provider,kind,description,price,quantity):
-    # get values for window_to_add
+    # Get values for window_to_add
     get_product = product.get()
     get_provider = provider.get()
     get_kind = kind.get()
@@ -66,7 +67,7 @@ def add_products(product,provider,kind,description,price,quantity):
 
     data_obtained = [None,get_product,get_provider,get_kind,get_description,get_price,get_quantity]
 
-    #avoid errors of programs
+    # Avoid errors of programs
     if (len(get_product) or len(get_provider) or len(get_kind) or len(get_description) or len(get_price) or len(get_quantity)) == 0:
         messagebox.showerror("ERROR","Complete empty spaces",icon="error")
 
@@ -74,20 +75,34 @@ def add_products(product,provider,kind,description,price,quantity):
         messagebox.showerror("ERROR","You cangt leave empty spaces",icon="error")
 
     else:
-        #upload data to database
+        # Upload data to database
         connection = mysql.connector.connect(**dbConnect)
         cursor = connection.cursor()
         cursor.execute(f"INSERT INTO inventary VALUES(%s,%s,%s,%s,%s,%s,%s)",data_obtained)
         connection.commit()
         connection.close()
-        #ADD MESSAGEBOX WHEN PROGRAMA FINISH AND CLEAR ENTRY WIDGETS
+
+        # Messagebox when program finish
+        messagebox.showinfo("","Products added succesfully")
+
+        # Clear entry widgets
+        product.delete(0, END)
+        provider.delete(0, END)
+        kind.delete(0, END)
+        description.delete(0, END)
+        price.delete(0, END)
+        quantity.delete(0, END)
 
 def window_to_add():
     window_add_products = Toplevel(window)
     width = 400
     height = 400
-    #ADD OPTION TO PREVENT THE WINDOW FROM MOVING
-    window_add_products.geometry(f"{width}x{height}")
+
+    # Place the window in the middle
+    x = (window_add_products.winfo_screenwidth() // 2) - (width // 2)
+    y = (window_add_products.winfo_screenheight() // 2) - (height // 2)
+
+    window_add_products.geometry(f"{width}x{height}+{x}+{y}")
     window_add_products.resizable(False,False)
 
     # Title Labels
@@ -109,8 +124,7 @@ def window_to_add():
     quantity_Label = Label(window_add_products,text = "QUANTITY:")
     quantity_Label.place(x=10,y=320)
 
-
-    #STRINGVAR
+    # Stringvar
     product_Label = StringVar()
     provider_Label = StringVar()
     kind_Label = StringVar()
@@ -118,7 +132,7 @@ def window_to_add():
     price_Label = StringVar()
     quantity_Label = StringVar()
 
-    #ENTRY
+    # Entry
     product_Entry = Entry(window_add_products,textvariable = product_Label,width = 30)
     product_Entry.place(x=10,y=40)
 
@@ -137,15 +151,67 @@ def window_to_add():
     quantity_Entry = Entry(window_add_products,textvariable = quantity_Label,width = 30)
     quantity_Entry.place(x=10,y=340)
 
-    #CONFIR BUTTON
+    # Confirm button
     confir_button = Button(window_add_products,text= "CONFIRM",bg= "green",command = lambda:add_products(product_Entry,provider_Entry,kind_Entry,description_Entry,price_Entry,quantity_Entry))
     confir_button.place(x=270,y=350)
+
+# WINDOW AND OPTIONS FOR DELETE PRODUCTS
+# add option for delete product by ID
+# add option for delete all products (im this option the program must ask double confimation)
+
+def delete_by_id():
+    # close or minimize window_to delete
+
+    window_del_by_id = Toplevel(window)
+    width = 200
+    height = 150
+
+    # Place the window in the middle
+    x = (window_del_by_id.winfo_screenwidth() // 2) - (width // 2)
+    y = (window_del_by_id.winfo_screenheight() // 2) - (height // 2)
+
+    window_del_by_id.geometry(f"{width}x{height}+{x}+{y}")
+    window_del_by_id.resizable(False, False)
+
+    # Entry for the ID
+
+
+    # Confirmation button product removal
+
+
+def delete_all():
+    # create 2 question messagebox for confirmation this option
+    print("all is delete")
+
+def window_to_delete():
+    # when selecting any option the window must be removed and create new window in the middle with corresponding options
+    window_del_products = Toplevel(window)
+    width = 250
+    height = 150
+
+    # Place the window in the middle
+    x = (window_del_products.winfo_screenwidth() // 2) - (width // 2)
+    y = (window_del_products.winfo_screenheight() // 2) - (height // 2)
+
+    window_del_products.geometry(f"{width}x{height}+{x}+{y}")
+    window_del_products.resizable(False, False)
+
+    del_id_button = Button(window_del_products, text= "Delete by ID", bg= "#FD0101", command = lambda:delete_by_id())
+    del_id_button.place(x=92,y= 40)
+
+    del_all_button = Button(window_del_products,text= "Delete All",bg="#BE0101", command = lambda: delete_all())
+    del_all_button.place(x=100, y=100)
+
+#WINDOW AND OPTIONS FOR EDIT PRODUCTS
+
+# Ask id of the program to edit, when the user put Id must appear boxes with the information to edit.
+# create a entry box in the top of window for introduce ID
+# under box, create new boxes where upload the informarion of that ID
 
 def window_to_edit():
     print("Edit products")
 
-def window_to_delete():
-    print("Delete products")
+
 
 def consult_products():
     print("consult")
@@ -172,7 +238,7 @@ window.geometry(f"{width}x{height}+{x}+{y}")
 window.config(bg = "#E7E7E7")
 
 
-# create 2 entry to the app where will receive the database and bill (database label be long and bills label be short and more with)
+# Create 2 entry to the app where will receive the database and bill (database label be long and bills label be short and more with)
 see_database = Entry(window,width= 70).place(x=10,y=30,height=600)
 see_bill = Entry(window,width = 50).place(x=465,y=231,height=400)
 
@@ -180,7 +246,7 @@ scroll_database = Scrollbar(window).place(x=430,y=30,height = 600)
 scroll_bill = Scrollbar(window).place(x=765,y=231,height = 400)
 
 
-#CREATE BILL BUTTONS
+# CREATE BILL BUTTONS
 create_bill = Button(window,text = "Create",command = lambda:fuc_create_bill()).place(x=660,y=190)
 print_bill = Button(window,text = "Print Bill",command = lambda: fuc_print_bill()).place(x=720,y=190)
 
@@ -206,7 +272,7 @@ menubar.add_cascade(label="Options", menu=optionmenu)
 
 
 # SEARCH BAR (WILL HAVE FILTER,SEARCH PRODUCTS OF DATABASE ETC) (this will serve as consulter) (as defult it will say CONSULT PRODUCT )
-img = Image.open('C:\\Users\\Pablo\\Desktop\\programacion\\PROGRAMACION CON PYTHON\\proyectos propios\\Inventary\\M_glass.png')
+img = Image.open('C:\\Users\\paibl\\Desktop\\programacion\\PROGRAMACION CON PYTHON\\proyectos propios\\Inventary\\M_glass.png')
 img = img.resize((30,30))
 img = ImageTk.PhotoImage(img)
 
