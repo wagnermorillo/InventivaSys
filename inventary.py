@@ -3,6 +3,13 @@ from PIL import Image, ImageTk
 from tkinter import messagebox
 import mysql.connector
 
+# add that after giving the messagebox to accept, the window will reappear.
+# add that windows that allow to open other windows are closed when the subsubwindow is opened.
+
+# solutions for the id: remove the autoincrement and put that when adding a product a random id is created.
+# let the increased car stay the same.
+# find more information on how to make autoincrement restart
+
 # when i finish the program, add that is posiible to change the database,edit and exit.(this code not found,at the end finish it)
 """def add_database():
     # database option, put in connet option,that need to put host,user,name of same and password and return thist information 
@@ -54,7 +61,6 @@ dbConnect = {
 connection = mysql.connector.connect(**dbConnect)
 cursor = connection.cursor()
 
-
 # WINDOW AND OPTIONS FOT ADD A NEW PRODUCTS
 def add_products(product,provider,kind,description,price,quantity):
     # Get values for window_to_add
@@ -76,11 +82,8 @@ def add_products(product,provider,kind,description,price,quantity):
 
     else:
         # Upload data to database
-        connection = mysql.connector.connect(**dbConnect)
-        cursor = connection.cursor()
         cursor.execute(f"INSERT INTO inventary VALUES(%s,%s,%s,%s,%s,%s,%s)",data_obtained)
         connection.commit()
-        connection.close()
 
         # Messagebox when program finish
         messagebox.showinfo("","Products added succesfully")
@@ -156,15 +159,19 @@ def window_to_add():
     confir_button.place(x=270,y=350)
 
 # WINDOW AND OPTIONS FOR DELETE PRODUCTS
-# add option for delete product by ID
-# add option for delete all products (im this option the program must ask double confimation)
+def delete_button(ID):
+    # create a list of all the id of the database, then go through that list and ask if the chosen id is in this list if not, that it appears that
+    # it is not available, if it is available then that it is eliminated.
+
+    get_id = ID.get()
+    cursor.execute(f"delete from inventary where id = {get_id}")
+    connection.commit()
 
 def delete_by_id():
-    # close or minimize window_to delete
 
     window_del_by_id = Toplevel(window)
-    width = 200
-    height = 150
+    width = 250
+    height = 100
 
     # Place the window in the middle
     x = (window_del_by_id.winfo_screenwidth() // 2) - (width // 2)
@@ -173,18 +180,38 @@ def delete_by_id():
     window_del_by_id.geometry(f"{width}x{height}+{x}+{y}")
     window_del_by_id.resizable(False, False)
 
-    # Entry for the ID
+    # Label for the ID
+    id_label = Label(window_del_by_id, text= "Enter the ID")
+    id_label.place(x=18,y=20)
 
+    # Stringvar
+    id_label = StringVar()
+
+    # Entry for the ID
+    id_entry = Entry(window_del_by_id,textvariable = id_label,width=10) 
+    id_entry.place(x=20,y=50)
 
     # Confirmation button product removal
+    id_button = Button(window_del_by_id,text="Delete",bg="#01DF01",command = lambda: delete_button(id_entry))
+    id_button.place(x=150,y=48)
 
 
 def delete_all():
-    # create 2 question messagebox for confirmation this option
-    print("all is delete")
+    first_message = messagebox.askyesno("", "you are about to delete all the information from the database, do you want to continue?", icon="warning")
+    if first_message == True:
+        second_message = messagebox.askokcancel("","click on accept to delete the information from the database",icon= "error")
+        if second_message == True:
+            cursor.execute("truncate table inventary")
+            connection.commit()
+            messagebox.showinfo("", "information successfully removed")
+        else:
+            pass
+    else:
+        pass
+
 
 def window_to_delete():
-    # when selecting any option the window must be removed and create new window in the middle with corresponding options
+
     window_del_products = Toplevel(window)
     width = 250
     height = 150
@@ -196,10 +223,10 @@ def window_to_delete():
     window_del_products.geometry(f"{width}x{height}+{x}+{y}")
     window_del_products.resizable(False, False)
 
-    del_id_button = Button(window_del_products, text= "Delete by ID", bg= "#FD0101", command = lambda:delete_by_id())
+    del_id_button = Button(window_del_products, text= "Delete by ID", bg= "#01DF01", command = lambda:delete_by_id())
     del_id_button.place(x=92,y= 40)
 
-    del_all_button = Button(window_del_products,text= "Delete All",bg="#BE0101", command = lambda: delete_all())
+    del_all_button = Button(window_del_products, text="Delete All", bg="#FF0040", command=lambda: delete_all())
     del_all_button.place(x=100, y=100)
 
 #WINDOW AND OPTIONS FOR EDIT PRODUCTS
@@ -211,8 +238,6 @@ def window_to_delete():
 def window_to_edit():
     print("Edit products")
 
-
-
 def consult_products():
     print("consult")
 
@@ -221,7 +246,6 @@ def fuc_create_bill():
 
 def fuc_print_bill():
     print("printing")
-
 
 
 # CREATE PRINCIPAL SCREEN 
