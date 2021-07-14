@@ -54,36 +54,59 @@ dbConnect = {
 connection = mysql.connector.connect(**dbConnect)
 cursor = connection.cursor()
 
+# THIS FUNCTION SEARCH THE EXISTING CODES IN THE DATABASE
+def search_code():
+    cursor.execute("SELECT code FROM inventary")
+    codes = cursor.fetchall()
+    code_table = []
+
+    for c in codes:
+        str_code = "".join(c)
+        code_table.append(str_code)
+
+    return code_table
+
 # WINDOW AND OPTIONS FOT ADD A NEW PRODUCTS
-def add_products(product,provider,kind,description,price,quantity,window_add_products):
+def add_products(code, product, provider, kind, description, price, quantity, window_add_products):
+    code_table = search_code()  # Instance of the search code function
+
     # Get values for window_to_add
+    get_code = str(code.get()).upper()
     get_product = product.get()
     get_provider = provider.get()
     get_kind = kind.get()
     get_description = str(description.get())
-    get_price = str(price.get())
-    get_quantity =str(quantity.get())
+    get_price = (price.get())
+    get_quantity = (quantity.get())
 
-    data_obtained = [None,get_product,get_provider,get_kind,get_description,get_price,get_quantity]
+    data_obtained = [get_code,get_product,get_provider,get_kind,get_description,get_price,get_quantity]
+
+    # Throws an error message when an existing code is placed in the program
+    # Even so, I need to put something so that it does not launch the error in console
+    if get_code in code_table:
+        messagebox.showerror("ERROR", "The product code already exists, use another code", icon = "error")
+        window_add_products.lift()  # Put the window in front
 
     # Avoid errors of programs
-    if (len(get_product) or len(get_provider) or len(get_kind) or len(get_description) or len(get_price) or len(get_quantity)) == 0:
+    if (len(get_code) or len(get_product) or len(get_provider) or len(get_kind) or len(get_description) or len(get_price) or len(get_quantity)) == 0:
         messagebox.showerror("ERROR","Complete empty spaces",icon="error")
-      
-    
-    elif (len(get_product) and len(get_provider) and len(get_kind) and len(get_description) and len(get_price) and len(get_quantity)) == 0:
+
+    elif (len(get_code) and len(get_product) and len(get_provider) and len(get_kind) and len(get_description) and len(get_price) and len(get_quantity)) == 0:
         messagebox.showerror("ERROR","You cangt leave empty spaces",icon="error")
-       
+
+    elif (len(get_code) < 5 or len(get_code) > 8):
+        messagebox.showerror("ERROR", "The code must be between 5 and 8 characters", icon="error")
 
     else:
         # Upload data to database
-        cursor.execute(f"INSERT INTO inventary VALUES(,%s,%s,%s,%s,%s,%s,%s)", data_obtained)
+        cursor.execute(f"INSERT INTO inventary VALUES(%s,%s,%s,%s,%s,%s,%s)", data_obtained)
         connection.commit()
 
         # Messagebox when program finish
         messagebox.showinfo("","Products added succesfully")
 
         # Clear entry widgets
+        code.delete(0, END)
         product.delete(0, END)
         provider.delete(0, END)
         kind.delete(0, END)
@@ -96,8 +119,8 @@ def add_products(product,provider,kind,description,price,quantity,window_add_pro
 
 def window_to_add():
     window_add_products = Toplevel(window)
-    width = 400
-    height = 400
+    width = 450
+    height = 450
 
     # Place the window in the middle
     x = (window_add_products.winfo_screenwidth() // 2) - (width // 2)
@@ -119,11 +142,14 @@ def window_to_add():
     description_Label = Label(window_add_products,text = "DESCRIPTION:")
     description_Label.place(x=10,y=200)
 
+    code_Label = Label (window_add_products, text ="CODE:")
+    code_Label.place(x=10,y=260)
+
     price_Label = Label(window_add_products,text = "PRICE:")
-    price_Label.place(x=10,y=260)
+    price_Label.place(x=10,y=320)
 
     quantity_Label = Label(window_add_products,text = "QUANTITY:")
-    quantity_Label.place(x=10,y=320)
+    quantity_Label.place(x=10,y=380)
 
     # Stringvar
     product_Label = StringVar()
@@ -132,6 +158,7 @@ def window_to_add():
     description_Label = StringVar()
     price_Label = StringVar()
     quantity_Label = StringVar()
+    code_Label = StringVar()
 
     # Entry
     product_Entry = Entry(window_add_products,textvariable = product_Label,width = 30)
@@ -146,29 +173,45 @@ def window_to_add():
     description_Entry = Entry(window_add_products,textvariable = description_Label,width = 30)
     description_Entry.place(x=10,y=220)
 
+    code_Entry = Entry(window_add_products,textvariable = code_Label,width = 30)
+    code_Entry.place(x=10,y=280)
+
     price_Entry = Entry(window_add_products,textvariable = price_Label,width = 30)
-    price_Entry.place(x=10,y=280)
+    price_Entry.place(x=10,y=340)
 
     quantity_Entry = Entry(window_add_products,textvariable = quantity_Label,width = 30)
-    quantity_Entry.place(x=10,y=340)
+    quantity_Entry.place(x=10,y=400)
 
     # Confirm button
-    confir_button = Button(window_add_products,text= "CONFIRM",bg= "green",command = lambda:add_products(product_Entry,provider_Entry,kind_Entry,description_Entry,price_Entry,quantity_Entry,window_add_products))
-    confir_button.place(x=270,y=350)
+    confir_button = Button(window_add_products,text= "CONFIRM",bg= "green",command = lambda:add_products(code_Entry,product_Entry,provider_Entry,kind_Entry,description_Entry,price_Entry,quantity_Entry,window_add_products))
+    confir_button.place(x=270,y=410)
 
 
 # WINDOW AND OPTIONS FOR DELETE PRODUCTS
 
-# create a code field, with this code the client can access the database product.
-# create a function that creates a random code when a product is added, then give the option to edit.
-# create a list of all the id of the database, then go through that list and ask if the chosen id is in this list if not, that it appears that it is not available, if it is available then that it is eliminated.
-
 # Delete button options
-def delete_button(code):
-    get_code = code.get()
-    cursor.execute(f'delete from inventary where code = "xd"')
-    messagebox.showinfo("","product remove successfully")
-    connection.commit()
+def delete_button(code, window_delete_by_code):
+    get_code = str(code.get()).upper()
+    code_table = search_code()
+    window_del_by_code = window_delete_by_code # window instance
+
+    # In case the user leaves the space empty
+    if len (get_code) <= 0:
+        messagebox.showerror("ERROR", "Complete empty spaces", icon="error")
+
+    # Condition that serves to eliminate the existing codes and show error when it does not exist
+    elif get_code in code_table:
+        cursor.execute(f'delete from inventary where code = "{get_code}"')
+        connection.commit()
+        messagebox.showinfo("","product remove successfully")
+
+        # Clear entry widgets
+        code.delete(0, END)
+
+    else:
+        messagebox.showerror("ERROR", "The code doesn't exist", icon="error")
+
+    window_del_by_code.lift()  # Put the window in front
 
 # Function to remove products by code
 def delete_by_code(window_del_products):
@@ -176,7 +219,7 @@ def delete_by_code(window_del_products):
     window_del_by_code = Toplevel(window)
     width = 250
     height = 100
-
+    
     # Destroy the main delete window
     window_del_products.destroy()
 
@@ -199,13 +242,12 @@ def delete_by_code(window_del_products):
     code_entry.place(x=20,y=50)
 
     # Confirmation button product removal
-    code_button = Button(window_del_by_code,text="Delete",bg="#01DF01",command = lambda: delete_button(code_entry))
+    code_button = Button(window_del_by_code,text="Delete",bg="#01DF01",command = lambda: delete_button(code_entry, window_del_by_code))
     code_button.place(x=140,y=46)
 
 # Delete all function
 def delete_all(window_del_products):
-    # Hide the window
-    window_del_products.iconify()
+    window_del_products.iconify() # Hide the window
 
     first_message = messagebox.askyesno("", "you are about to delete all the information from the database, do you want to continue?", icon="warning")
     if first_message == True:
@@ -217,13 +259,13 @@ def delete_all(window_del_products):
             window_del_products.destroy() 
 
         else:
-            window_del_products.deiconify() # reappear window
+            window_del_products.deiconify() # Reappear window
     else:
-        window_del_products.deiconify() # reappear window
+        window_del_products.deiconify() # Reappear window
 
 
 def window_to_delete():
-
+    # I would like an option that when the X (exit button of the windows) is given, the window reappears with the option to delete information
     window_del_products = Toplevel(window)
     width = 250
     height = 150
