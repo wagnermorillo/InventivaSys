@@ -3,6 +3,8 @@ from PIL import Image, ImageTk
 from tkinter import messagebox
 import mysql.connector
 
+# https://stackoverflow.com/questions/31815007/change-icon-for-tkinter-messagebox (This will serve for the moment to change the tkinter icon for something mine)
+
 # when i finish the program, add that is posiible to change the database,edit and exit.(this code not found,at the end finish it)
 """def add_database():
     # database option, put in connet option,that need to put host,user,name of same and password and return thist information 
@@ -43,6 +45,7 @@ import mysql.connector
     confirm_button = Button(window_add_database,text="Confirm",bg= "green",command = lambda: stablish_connection(host_Entry,user_Entry,pass_Entry,database_Entry))
     confirm_button.place(x=270,y=250) """
 
+
 # DB CONNECT
 dbConnect = {
     "host": "localhost",
@@ -53,6 +56,7 @@ dbConnect = {
 
 connection = mysql.connector.connect(**dbConnect)
 cursor = connection.cursor()
+
 
 # THIS FUNCTION SEARCH THE EXISTING CODES IN THE DATABASE
 def search_code():
@@ -66,7 +70,8 @@ def search_code():
 
     return code_table
 
-# WINDOW AND OPTIONS FOT ADD A NEW PRODUCTS
+
+# COMMAND FOR ADD A NEW PRODUCTS TO DATABASE
 def add_products(code, product, provider, kind, description, price, quantity, window_add_products):
     code_table = search_code()  # Instance of the search code function
 
@@ -82,41 +87,45 @@ def add_products(code, product, provider, kind, description, price, quantity, wi
     data_obtained = [get_code,get_product,get_provider,get_kind,get_description,get_price,get_quantity]
 
     # Throws an error message when an existing code is placed in the program
-    # Even so, I need to put something so that it does not launch the error in console
     if get_code in code_table:
         messagebox.showerror("ERROR", "The product code already exists, use another code", icon = "error")
         window_add_products.lift()  # Put the window in front
 
-    # Avoid errors of programs
-    if (len(get_code) or len(get_product) or len(get_provider) or len(get_kind) or len(get_description) or len(get_price) or len(get_quantity)) == 0:
-        messagebox.showerror("ERROR","Complete empty spaces",icon="error")
-
-    elif (len(get_code) and len(get_product) and len(get_provider) and len(get_kind) and len(get_description) and len(get_price) and len(get_quantity)) == 0:
-        messagebox.showerror("ERROR","You cangt leave empty spaces",icon="error")
-
-    elif (len(get_code) < 5 or len(get_code) > 8):
-        messagebox.showerror("ERROR", "The code must be between 5 and 8 characters", icon="error")
-
+    # Inside this ELSE is everything necessary to insert the values into the database
     else:
-        # Upload data to database
-        cursor.execute(f"INSERT INTO inventary VALUES(%s,%s,%s,%s,%s,%s,%s)", data_obtained)
-        connection.commit()
+        # Avoid errors of programs
+        if (len(get_code) or len(get_product) or len(get_provider) or len(get_kind) or len(get_description) or len(get_price) or len(get_quantity)) == 0:
+            messagebox.showerror("ERROR","Complete empty spaces",icon="error")
 
-        # Messagebox when program finish
-        messagebox.showinfo("","Products added succesfully")
+        elif (len(get_code) and len(get_product) and len(get_provider) and len(get_kind) and len(get_description) and len(get_price) and len(get_quantity)) == 0:
+            messagebox.showerror("ERROR","You cangt leave empty spaces",icon="error")
 
-        # Clear entry widgets
-        code.delete(0, END)
-        product.delete(0, END)
-        provider.delete(0, END)
-        kind.delete(0, END)
-        description.delete(0, END)
-        price.delete(0, END)
-        quantity.delete(0, END)
-    
-    # Put the window in front
-    window_add_products.lift()
+        elif (len(get_code) < 5 or len(get_code) > 8):
+            messagebox.showerror("ERROR", "The code must be between 5 and 8 characters", icon="error")
 
+        else:
+            # Upload data to database
+            cursor.execute(f"INSERT INTO inventary VALUES(%s,%s,%s,%s,%s,%s,%s)", data_obtained)
+            connection.commit()
+
+            # Messagebox when program finish
+            messagebox.showinfo("","Products added succesfully")
+
+            # Clear entry widgets
+            code.delete(0, END)
+            product.delete(0, END)
+            provider.delete(0, END)
+            kind.delete(0, END)
+            description.delete(0, END)
+            price.delete(0, END)
+            quantity.delete(0, END)
+        
+        # Put the window in front
+        window_add_products.lift()
+
+
+#WINDOW AND OPTIONS TO ADD PRODUCTS TO DATABASE
+# principal window to add products to database
 def window_to_add():
     window_add_products = Toplevel(window)
     width = 450
@@ -188,7 +197,6 @@ def window_to_add():
 
 
 # WINDOW AND OPTIONS FOR DELETE PRODUCTS
-
 # Delete button options
 def delete_button(code, window_delete_by_code):
     get_code = str(code.get()).upper()
@@ -216,10 +224,16 @@ def delete_button(code, window_delete_by_code):
 # Function to remove products by code
 def delete_by_code(window_del_products):
 
-    window_del_by_code = Toplevel(window)
+    # This function serves to destroy the current window when the X is given and in turn open the previous window
+    def X_options():
+        window_del_by_code.destroy()
+        window_to_delete()
+
+    window_del_by_code = Toplevel(window) 
     width = 250
     height = 100
-    
+    window_del_by_code.protocol("WM_DELETE_WINDOW",X_options)
+
     # Destroy the main delete window
     window_del_products.destroy()
 
@@ -263,9 +277,8 @@ def delete_all(window_del_products):
     else:
         window_del_products.deiconify() # Reappear window
 
-
+# principal window to delete productos from database
 def window_to_delete():
-    # I would like an option that when the X (exit button of the windows) is given, the window reappears with the option to delete information
     window_del_products = Toplevel(window)
     width = 250
     height = 150
@@ -283,17 +296,159 @@ def window_to_delete():
     del_all_button = Button(window_del_products, text="Delete All", bg="#FF0040", command=lambda: delete_all(window_del_products))
     del_all_button.place(x=100, y=100)
 
-#WINDOW AND OPTIONS FOR EDIT PRODUCTS
 
-# Ask id of the program to edit, when the user put Id must appear boxes with the information to edit.
-# create a entry box in the top of window for introduce ID
-# under box, create new boxes where upload the informarion of that ID
+# WINDOW AND OPTIONS FOR EDIT PRODUCTS IN DATABASE
+# Function used to erase the information within the entrys in the window and unlock the code button
+def clear_information(entry_button, update_button, first_code,product_code,product,provider,kind,description,price,quantity):
+    entry_button.config(state= "normal") #Enable Code button again / entry_button["state"] = "normal"
+    update_button.config(state= "disabled")
 
+    # Remove information from fields
+    first_code.delete(0,END)
+    product_code.delete(0,END)
+    product.delete(0,END)
+    provider.delete(0,END)
+    kind.delete(0,END)
+    description.delete(0, END)
+    price.delete(0, END)
+    quantity.delete(0, END)
+    
+    product_code.config(state="disabled")
+    product.config(state="disabled")
+    provider.config(state="disabled")
+    kind.config(state="disabled")
+    description.config(state="disabled")
+    price.config(state="disabled")
+    quantity.config(state="disabled")
+
+# Function connected to the code button, it has all the functions of the same 
+def edit_search_info(window_edit_products,entry_button,update_button,first_code,product_code,product,provider,kind,description,price,quantity):
+    #Activate the entry fields to be able to write
+    product_code.config(state= "normal")
+    product.config(state= "normal")
+    provider.config(state= "normal")
+    kind.config(state= "normal")
+    description.config(state= "normal")
+    price.config(state= "normal")
+    quantity.config(state= "normal")
+
+    codes = search_code()
+    code = str(first_code.get()).upper()
+
+    if len(code) < 1:
+        messagebox.showerror("ERROR", "complete empty spaces", icon="error")
+        window_edit_products.lift()
+
+    elif code in codes: # Main program options
+        cursor.execute(f"SELECT * FROM inventary WHERE code = '{code}'")
+        info = cursor.fetchall()
+
+        for i in info: # The for will serve to search index by index the data to insert in the entry
+            product_code.insert(END,i[0])
+            product.insert(END,i[1])
+            provider.insert(END,i[2])
+            kind.insert(END,i[3])
+            description.insert(END,i[4])
+            price.insert(END,i[5])
+            quantity.insert(END,i[6])
+
+        entry_button.config(state="disabled")  #Block Code button / entry_button["state"] = "disabled" 
+        update_button.config(state="normal")
+
+    else:
+        messagebox.showerror("ERROR", "The code doesn't exist", icon="error")
+        window_edit_products.lift()
+
+# Function that sends the updated information to the database
+def update_information(window_edit_products,entry_button,update_button,first_code,product_code,product,provider,kind,description,price,quantity):
+    get_first_code = str(first_code.get()).upper()
+    get_product_code = str(product_code.get()).upper()
+    get_product = str(product.get())
+    get_provider = str(provider.get())
+    get_kind = str(kind.get())
+    get_description = str(description.get())
+    get_price = price.get()
+    get_quantity = (quantity.get())
+
+    cursor.execute(F"UPDATE inventary SET code ='{get_product_code}',product='{get_product}',provider='{get_provider}',kind='{get_kind}',description='{get_description}',price={get_price},quantity={get_quantity} WHERE code = '{get_first_code}'")
+    connection.commit()
+    messagebox.showinfo("", "Successful data update",icon ="info")
+    clear_information(entry_button, update_button, first_code, product_code, product, provider,kind,description,price,quantity)
+
+    window_edit_products.lift()  # Reappear window
+
+# Principal window for edit products of database
 def window_to_edit():
-    print("Edit products")
+    window_edit_products = Toplevel(window)
+    width = 500
+    height = 275
+    # Place the window in the middle
+    x = (window_edit_products.winfo_screenwidth() // 2) - (width // 2)
+    y = (window_edit_products.winfo_screenheight() // 2) - (height //2)
+
+    window_edit_products.geometry(f"{width}x{height}+{x}+{y}")
+    window_edit_products.resizable(False,False)
+
+    # Title Label
+    code_label = Label(window_edit_products,text= "CODE").place(x=50,y=80)
+    product_label = Label(window_edit_products,text="PRODUCT").place(x=157,y=80)
+    provider_label = Label(window_edit_products, text="PROVIDER").place(x=276,y=80)
+    kind_label = Label(window_edit_products, text="KIND").place(x=410,y=80)
+    description_label = Label(window_edit_products, text="DESCRIPTION").place(x=88, y=155)
+    price_label = Label(window_edit_products, text="PRICE").place(x=288,y=155)
+    quantity_label = Label(window_edit_products, text="QUANTITY").place(x=395, y=155)
+
+    # Stringvar
+    code_stringvar = StringVar()
+    code_label = StringVar()
+    product_label = StringVar()
+    provider_label = StringVar()
+    kind_label = StringVar()
+    description_label = StringVar()
+    price_label = StringVar()
+    quantity_label = StringVar()
+
+    # Entry First row
+    first_code_entry = Entry(window_edit_products,textvariable = code_stringvar,width =15)
+    first_code_entry.place(x=20, y=30)
+
+    code_entry = Entry(window_edit_products,state="disabled",textvariable = code_label, width =15)
+    code_entry.place(x=20, y=100)
+
+    product_entry = Entry(window_edit_products,state="disabled",textvariable= product_label,width =15)
+    product_entry.place(x=140, y=100)
+
+    provider_entry = Entry(window_edit_products,state="disabled",textvariable= provider_label, width=15)
+    provider_entry.place(x=260, y=100)
+
+    kind_entry = Entry(window_edit_products,state= "disabled",textvariable= kind_label, width=15)
+    kind_entry.place(x=380, y=100)
+
+    #Entry Second row
+    description_entry = Entry(window_edit_products,state="disabled",textvariable=description_label,width=35)
+    description_entry.place(x=20, y=175)
+
+    price_entry = Entry(window_edit_products,state="disabled",textvariable= price_label, width=15)
+    price_entry.place(x=260, y=175)
+
+    quantity_entry = Entry(window_edit_products,state="disabled",textvariable= quantity_label, width=15)
+    quantity_entry.place(x=380, y=175)
+    
+    # Buttons
+    first_code_button = Button(window_edit_products, text="CODE", bg="#01DF01", command = lambda:edit_search_info(window_edit_products,first_code_button,update_button,first_code_entry,code_entry,product_entry,provider_entry,kind_entry,description_entry,price_entry,quantity_entry))
+    first_code_button.place(x=125,y=27)
+
+    clear_button = Button(window_edit_products,text="CLEAR",bg="red",command = lambda:clear_information(first_code_button,update_button,first_code_entry,code_entry,product_entry,provider_entry,kind_entry,description_entry,price_entry,quantity_entry))
+    clear_button.place(x=180,y=27)
+
+    update_button = Button(window_edit_products, text="UPDATE",state= "disabled",bg="#01DF01",command = lambda:update_information(window_edit_products,first_code_button,update_button,first_code_entry,code_entry,product_entry,provider_entry,kind_entry,description_entry,price_entry,quantity_entry))
+    update_button.place(x=420,y=225)
 
 def consult_products():
     print("consult")
+
+def show_products():
+    print("Show")
 
 def fuc_create_bill():
     print("created")
@@ -315,14 +470,30 @@ window.geometry(f"{width}x{height}+{x}+{y}")
 
 window.config(bg = "#E7E7E7")
 
+# I need to make the scrollbar work correctly, for that first I want to see the data, to see if it is fixed, if not then I will try with the rowspan and columspan functions so that the movement is possible.
+# I would like the columspan and rowspan to work with the number of cells that the database has and so that all the information is seen, I will confirm this later
+
+# Another idea that I have is, put a canvas or an entry behind the listbox, and that it expands to the total size of the entry and so it will grow and decrease according to, and when no more information can be seen, the scrollbar would be used
 
 # Create 2 entry to the app where will receive the database and bill (database label be long and bills label be short and more with)
-see_database = Entry(window,width= 70).place(x=10,y=30,height=600)
-see_bill = Entry(window,width = 50).place(x=465,y=231,height=400)
+see_database = Listbox(window,width = 70,height = 600)
+see_database.place(x=10,y=30) #Entry(window,width= 70).place(x=10,y=30,height=600)
 
-scroll_database = Scrollbar(window).place(x=430,y=30,height = 600)
-scroll_bill = Scrollbar(window).place(x=765,y=231,height = 400)
+see_bill = Listbox(window,width=50,height=400)
+see_bill.place(x=465,y=231) #Entry(window,width = 50).place(x=465,y=231,height=400)
 
+scroll_database = Scrollbar(window)
+scroll_database.place(x=430,y=30,height = 600)
+
+scroll_bill = Scrollbar(window)
+scroll_bill.place(x=765,y=231,height = 400)
+
+#in those 4 lines of code, I configure the scrollbar to work according to the list
+see_database.configure(yscrollcommand= scroll_database.set)
+see_bill.configure(yscrollcommand= scroll_bill.set)
+
+scroll_database.configure(command= see_database.yview)
+scroll_bill.configure(command= see_bill.yview)
 
 # CREATE BILL BUTTONS
 create_bill = Button(window,text = "Create",command = lambda:fuc_create_bill()).place(x=660,y=190)
