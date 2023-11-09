@@ -1,41 +1,47 @@
-from PySide6.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QLineEdit, QFormLayout, QPushButton, QHBoxLayout, QGridLayout, QSizePolicy, QApplication
-from PySide6.QtCore import QSize, Qt, QMargins
-from PySide6.QtGui import QIcon, QPalette, QColor, QFont
-import sys
+from PySide6.QtWidgets import QApplication, QMainWindow, QTableWidget, QTableWidgetItem
+from PySide6.QtCore import Qt
 
+class MyTable(QTableWidget):
+    def __init__(self, rows, cols):
+        super().__init__(rows, cols)
+        self.setHorizontalHeaderLabels(["Name", "Description", "Quantity"])
+        self.setHorizontalHeader()
+        self.initUI()
 
-class Color(QWidget):
-    def __init__(self, nuevo_color):
-        super().__init__()
-        # Indicamos que se puede agregar un color de fondo
-        self.setAutoFillBackground(True)
-        paletaColores = self.palette()
-        # Creamos el componente de color de fondo aplicando el nuevo color
-        paletaColores.setColor(QPalette.Window, QColor(nuevo_color))
-        # Aplicamos el nuevo color al componente
-        self.setPalette(paletaColores)
+    def initUI(self):
+        self.cellChanged.connect(self.on_cell_changed)
+        self.add_data(3)  # Agregamos 3 filas de ejemplo
+        self.horizontalHeader().setSortIndicator(0, Qt.AscendingOrder)  # Establecer columna inicial de ordenación
 
-class ResizableButtons(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.resize(QSize(1066, 600))
-        self.setMinimumSize(QSize(1066,600))
-        # grid
-        grid = QGridLayout()
-        for i in range(3):
-            for j in range(3):
-                grid.addWidget(Color("red"),i,j)
-        # vertical
-        vertical = QVBoxLayout()
-        vertical.addLayout(grid)
-        vertical.addWidget(Color("blue"))
-        # contenedor
-        container = QWidget()
-        container.setLayout(vertical)
-        self.setCentralWidget(container)
+        # Habilitar ordenación
+        self.setSortingEnabled(True)
 
-if __name__ == '__main__':
+    def add_data(self, num_rows):
+        for i in range(num_rows):
+            self.insertRow(self.rowCount())
+            self.setItem(self.rowCount() - 1, 0, QTableWidgetItem("Item {}".format(self.rowCount())))
+            self.setItem(self.rowCount() - 1, 1, QTableWidgetItem("Description {}".format(self.rowCount())))
+            self.setItem(self.rowCount() - 1, 2, QTableWidgetItem("1"))
+
+    def on_cell_changed(self, row, col):
+        item = self.item(row, col)
+        if item is not None:
+            print("Valor en fila {}, columna {}: {}".format(row, col, item.text()))
+
+if __name__ == "__main__":
+    import sys
+"""
     app = QApplication(sys.argv)
-    window = ResizableButtons()
+    window = QMainWindow()
+    table = MyTable(0, 3)
+    window.setCentralWidget(table)
     window.show()
     sys.exit(app.exec_())
+"""
+
+from models.models import Product
+from models.db import session
+
+with session:
+    product = session.query(Product).all()
+    print(f"trage el producto: {product[0]} len: {len(product)}")

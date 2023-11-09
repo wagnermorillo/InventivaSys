@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QPushBu
 from PySide6.QtCore import QSize, Qt, QMargins
 from PySide6.QtGui import QIcon, QPalette, QColor, QFont
 # class of input window
-class Input(QMainWindow):
+class Component(QMainWindow):
     # constructor
     def __init__(self):
         super().__init__()
@@ -14,3 +14,4 @@ class Input(QMainWindow):
         # para iconos
         icon = QIcon(r"src/icon.ico")
         self.setWindowIcon(icon)
+        self.setCentralWidget(QLabel("hola"))

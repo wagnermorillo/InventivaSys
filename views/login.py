@@ -1,9 +1,8 @@
 from functools import partial
-import sys
 from controllers.auth import Authetication
-from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLineEdit, QFormLayout, QPushButton, QHBoxLayout
-from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QIcon, QPalette, QColor, QFont, QCursor
+from PySide6.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QLineEdit, QFormLayout, QPushButton, QHBoxLayout
+from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtGui import QIcon, QPalette, QColor, QFont
 
 class Font(QFont):
     def __init__(self, n : int):
@@ -12,6 +11,8 @@ class Font(QFont):
         self.setBold(False)
 
 class Componente(QMainWindow):
+    # atributos para los signal
+    openPrincipal = Signal()
     # constructors
     def __init__(self) -> None:
         super().__init__()

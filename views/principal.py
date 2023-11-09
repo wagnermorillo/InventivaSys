@@ -1,23 +1,7 @@
 from functools import partial
 from PySide6.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QPushButton, QGridLayout
-from PySide6.QtCore import QSize, Qt, QMargins
+from PySide6.QtCore import QSize, Qt, QMargins, Signal
 from PySide6.QtGui import QIcon, QPalette, QColor, QFont
-from controllers.principalContr import Controller
-
-class Color(QWidget):
-    def __init__(self, nuevo_color, child : QWidget) -> QWidget:
-        super().__init__()
-        # Indicamos que se puede agregar un color de fondo
-        self.setAutoFillBackground(True)
-        paletaColores = self.palette()
-        # Creamos el componente de color de fondo aplicando el nuevo color
-        paletaColores.setColor(QPalette.Window, QColor(nuevo_color))
-        # Aplicamos el nuevo color al componente
-        self.setPalette(paletaColores)
-        # hijo
-        layout = QVBoxLayout()
-        layout.addWidget(child)
-        self.setLayout(layout)
 
 class Font(QFont):
     def __init__(self, n : int):
@@ -28,6 +12,11 @@ class Font(QFont):
 
 # class principal of the program
 class Principal(QMainWindow):
+    # atributos para los signal
+    openInventary = Signal()
+    openInput = Signal()
+    openExit = Signal()
+
     # constructor
     def __init__(self):
         super().__init__()
@@ -40,22 +29,28 @@ class Principal(QMainWindow):
         self.setWindowIcon(icon)
         # layout de grilla
         layout = QGridLayout()
-        layout.addLayout(self.LabelCentral(),0,0,1,2,Qt.AlignmentFlag.AlignCenter)
-        # btnInput
-        self.btnInput = self._Button("Input",r"src/add.ico")
-        self.btnInput.clicked.connect(partial(Controller.Input, self))
-        layout.addWidget(self.btnInput,1,0)
-        layout.addWidget(self._Button("Output", r"src/subtract.ico"),1,1)
-        layout.addWidget(self._Button("Inventary", r"src/clipboard.svg"),2,0)
-        layout.addWidget(self._Button("Settings", r"src/gear.ico"),2,1)
         layout.setVerticalSpacing(45)
         layout.setHorizontalSpacing(150)
         layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        layout.addLayout(self.LabelCentral(),0,0,1,2,Qt.AlignmentFlag.AlignCenter)
+        # btnInput
+        self.btnInput = self._Button("Input",r"src/add.ico")
+        self.btnInput.clicked.connect(self.openInput.emit)
+        layout.addWidget(self.btnInput,1,0)
+        # btnOutput
+        layout.addWidget(self._Button("Output", r"src/subtract.ico"),1,1)
+        # btnInventary
+        self.btnInventary = self._Button("Inventary", r"src/clipboard.svg", icon=90)
+        self.btnInventary.clicked.connect(self.openInventary.emit)
+        layout.addWidget(self.btnInventary,2,0)
+        # settings
+        layout.addWidget(self._Button("Settings", r"src/gear.ico"),2,1)
         # vertical layout
         layoutV = QVBoxLayout()
         layoutV.addLayout(layout)
+        # btnexit
         self.btnExit = self._Button("Exit", r"src/exit.ico", 80, 80, 40)
-        self.btnExit.clicked.connect(partial(Controller.Exit, self))
+        self.btnExit.clicked.connect(self.openExit.emit)
         layoutV.addWidget(self.btnExit,alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
         # container
         container = QWidget()

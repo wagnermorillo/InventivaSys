@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import QMainWindow
-from views.principal import Principal
 
 # controllers for login
 class Authetication:
+    # atributos
     # auth of user
     @staticmethod
     def auth(obj: QMainWindow) -> None:
@@ -16,10 +16,8 @@ class Authetication:
             return None
         # example change future
         if username == "admin" and password == "admin":
-            obj.principal = Principal()
-            obj.principal.show()
-            obj.close()
-            return None
+            # login to login
+            obj.openPrincipal.emit()
         else:
             obj.message.setText("Error incorrect username or password")
             obj.message.setVisible(True)
