@@ -103,6 +103,7 @@ class Controller:
                                     "The record was successfully saved",
                                     QMessageBox.StandardButton.Ok)
             obj.listItem = list()
+            obj.txtComment.setText("")
             obj.loadDataSet()
         
         # si es false es output
@@ -132,6 +133,7 @@ class Controller:
                                     "The record was successfully saved",
                                     QMessageBox.StandardButton.Ok)
             obj.listItem = list()
+            obj.txtComment.setText("")
             obj.loadDataSet()
 
                 

@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlite3 import IntegrityError
-from typing import Any, List, Type
-from sqlalchemy import ForeignKey, Integer, String, Column, func, Table
+from typing import List, Type
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
 import bcrypt
 
@@ -41,8 +41,8 @@ class Product(Base):
     name: Mapped[str] = mapped_column(String(255), unique=True)
     description: Mapped[str] = mapped_column(String(255))
     quantity: Mapped[int] = mapped_column(default=0)
-    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    update_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+    create_at: Mapped[datetime] = mapped_column(default=datetime.now())
+    update_at: Mapped[datetime] = mapped_column(default=datetime.now(), onupdate=datetime.now())
     isDeleted: Mapped[bool] = mapped_column(default=False)
 
     def __str__(self) -> str:
@@ -67,8 +67,8 @@ class Record(Base):
     type: Mapped[bool] = mapped_column()
     comment: Mapped[str] = mapped_column(String(255), nullable=True)
     products: Mapped[List["RecordProduct"]] = relationship()
-    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    update_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+    create_at: Mapped[datetime] = mapped_column(default=datetime.now())
+    update_at: Mapped[datetime] = mapped_column(default=datetime.now(), onupdate=datetime.now())
     isDeleted: Mapped[bool] = mapped_column(default=False)
 
     def __str__(self) -> str:

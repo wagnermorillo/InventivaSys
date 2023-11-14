@@ -1,13 +1,8 @@
 from logging.config import fileConfig
 import dotenv, os, sys
 
-# cargando las .env
-dotenv.load_dotenv()
-USER_BD = os.getenv("USERBD")
-PASS_BD = os.getenv("PASSBD")
-HOST_BD = os.getenv("HOSTBD")
-NAME_BD = os.getenv("NAMEBD")
-FULL_URL_BD = f"postgresql://{USER_BD}:{PASS_BD}@{HOST_BD}/{NAME_BD}"
+dbPath = "../db.sqlite3"
+FULL_URL_BD = f"sqlite:///{dbPath}"
 
 # path para que funcionen los import
 project_root = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
