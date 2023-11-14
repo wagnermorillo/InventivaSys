@@ -125,6 +125,8 @@ class Controller:
                                          f"{product.name}, Output quantity is greater than stock quantity",
                                          QMessageBox.StandardButton.Ok)
                     return None
+                else:
+                    product.quantity -= quantity
             # guardar 
             session.add(record)
             session.commit()
