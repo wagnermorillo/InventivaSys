@@ -15,6 +15,7 @@ class Principal(QMainWindow):
     # atributos para los signal
     openInventary = Signal()
     openInput = Signal()
+    openOutput = Signal()
     openExit = Signal()
 
     # constructor
@@ -38,7 +39,9 @@ class Principal(QMainWindow):
         self.btnInput.clicked.connect(self.openInput.emit)
         layout.addWidget(self.btnInput,1,0)
         # btnOutput
-        layout.addWidget(self._Button("Output", r"src/subtract.ico"),1,1)
+        self.btnOutput = self._Button("Output",r"src/subtract.ico")
+        self.btnOutput.clicked.connect(self.openOutput.emit)
+        layout.addWidget(self.btnOutput,1,1)
         # btnInventary
         self.btnInventary = self._Button("Inventary", r"src/clipboard.svg", icon=90)
         self.btnInventary.clicked.connect(self.openInventary.emit)

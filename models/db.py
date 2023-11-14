@@ -12,7 +12,7 @@ NAME_BD = os.getenv("NAMEBD")
 FULL_URL_BD = f"postgresql://{USER_BD}:{PASS_BD}@{HOST_BD}/{NAME_BD}"
 
 # Configurar la base de datos
-engine = create_engine(FULL_URL_BD)
+engine = create_engine(FULL_URL_BD, connect_args={"options": "-c timezone=America/Santo_Domingo"})
 Base.metadata.create_all(engine)
 
 # crear session

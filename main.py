@@ -10,7 +10,6 @@ class App:
     def __init__(self) -> None:
         # atributos
         self.app = QApplication([])
-        self.input = Component()
 
     ########################################
     #           login
@@ -27,8 +26,10 @@ class App:
         self.principal.openInput.connect(self.PrincipalToInput)
         self.principal.openExit.connect(partial(self.PrincipalToExit, self.principal))
         self.principal.openInventary.connect(self.PrincipalToInventary)
+        self.principal.openOutput.connect(self.PrincipalToOutput)
         self.principal.show()
-        #                       self.login.close()
+        # esta
+        #self.login.close()
         self.login = None
      
     ########################################
@@ -51,8 +52,17 @@ class App:
     
     # de principal a input
     def PrincipalToInput(self):
-        self.input = Component()
+        self.input = Component("Input", True)
+        self.input.openPrincipal.connect(self.InputToPrincipal)
         self.input.show()
+        self.principal.close()
+        self.principal = None
+    
+    # de principal a output
+    def PrincipalToOutput(self):
+        self.output = Component("Output", False)
+        self.output.openPrincipal.connect(self.OutputToPrincipal)
+        self.output.show()
         self.principal.close()
         self.principal = None
     
@@ -61,7 +71,8 @@ class App:
         self.inventary = Inventary()
         self.inventary.openPrincipal.connect(self.InventaryToPrincipal)
         self.inventary.show()
-        #                self.principal.close()
+        # esta
+        self.principal.close()
         self.principal = None
     
     ########################################
@@ -73,13 +84,42 @@ class App:
         self.principal.openInput.connect(self.PrincipalToInput)
         self.principal.openExit.connect(partial(self.PrincipalToExit, self.principal))
         self.principal.openInventary.connect(self.PrincipalToInventary)
+        self.principal.openOutput.connect(self.PrincipalToOutput)
         self.principal.show()
         self.inventary.close()
         self.inventary = None
     
+    ########################################
+    #           input
+    #########################################
+    # input to principal
+    def InputToPrincipal(self):
+        self.principal = Principal()
+        self.principal.openInput.connect(self.PrincipalToInput)
+        self.principal.openExit.connect(partial(self.PrincipalToExit, self.principal))
+        self.principal.openInventary.connect(self.PrincipalToInventary)
+        self.principal.openOutput.connect(self.PrincipalToOutput)
+        self.principal.show()
+        self.input.close()
+        self.input = None
+    
+    ########################################
+    #           output
+    #########################################
+    # output to principal
+    def OutputToPrincipal(self):
+        self.principal = Principal()
+        self.principal.openInput.connect(self.PrincipalToInput)
+        self.principal.openExit.connect(partial(self.PrincipalToExit, self.principal))
+        self.principal.openInventary.connect(self.PrincipalToInventary)
+        self.principal.openOutput.connect(self.PrincipalToOutput)
+        self.principal.show()
+        self.output.close()
+        self.output = None
+    
     # run app
     def RunApp(self):
-        self.PrincipalToInventary()
+        self.LoginToPrincipal()
         sys.exit(self.app.exec())
 
 # ejecutor de la aplicación

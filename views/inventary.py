@@ -1,6 +1,9 @@
-from PySide6.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QPushButton, QGridLayout, QHBoxLayout, QComboBox, QLineEdit, QTableWidget, QTableWidgetItem, QHeaderView, QAbstractItemView
+from functools import partial
+from PySide6.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QPushButton, QHBoxLayout, QComboBox, QLineEdit, QTableWidget, QHeaderView, QAbstractItemView, QDialogButtonBox, QMessageBox, QSizePolicy 
 from PySide6.QtCore import QSize, Qt, QMargins, Signal
 from PySide6.QtGui import QIcon, QPalette, QColor, QFont
+from controllers.inventaryContr import Controller
+from .productDetails import Dialog
 
 class Color(QWidget):
     def __init__(self, nuevo_color):
@@ -22,6 +25,7 @@ class Font(QFont):
 class FontBold(QFont):
     def __init__(self):
         super().__init__()
+        self.setPointSize(11)
         self.setBold(True)
 
 # class of inventary window
@@ -42,21 +46,26 @@ class Inventary(QMainWindow):
         # layout vertical
         layoutV = QVBoxLayout()
         layoutV.addWidget(self.LabelCentral())
+        layoutV.addSpacing(40)
         layoutV.addLayout(self.Searching())
         # dataTable
         self.dataTable = self.Table()
-        self._DataTest()
-        layoutV.addWidget(self.dataTable)
+        Controller.LoadData(self.dataTable)
+        layoutV.addWidget(self.dataTable,
+                          alignment=Qt.AlignmentFlag.AlignHCenter)
         # layoutH for button
         layoutH = QHBoxLayout()
         # btnAdd
         self.btnAdd = self._Button("Add Product", r"src/add.svg")
+        self.btnAdd.clicked.connect(partial(self.OpenDialog, "Add Product", True))
         layoutH.addWidget(self.btnAdd)
         # btnEdit
         self.btnEdit = self._Button("Edit Product", r"src/edit.svg")
+        self.btnEdit.clicked.connect(partial(self.GetItemSelected, True))
         layoutH.addWidget(self.btnEdit)
         # btnDelete
         self.btnDelete = self._Button("Delete Product", r"src/delete.svg")
+        self.btnDelete.clicked.connect(self.GetItemSelected)
         layoutH.addWidget(self.btnDelete)
         layoutV.addLayout(layoutH)
         # btnExit
@@ -89,11 +98,11 @@ class Inventary(QMainWindow):
     def Searching(self):
         # combo
         self.comboBox = QComboBox()
-        self.comboBox.addItems(("Name", "Description", "Quantity"))
+        self.comboBox.addItems(("id", "Name", "Description", "Quantity"))
         self.comboBox.setEditable(False)
         self.comboBox.setInsertPolicy(QComboBox.NoInsert)
         self.comboBox.setFixedWidth(150)
-        self.comboBox.setCurrentIndex(-1)
+        self.comboBox.setCurrentIndex(0)
         self.comboBox.setFont(Font(11))
         self.comboBox.setFixedHeight(30)
         # textBox
@@ -110,26 +119,37 @@ class Inventary(QMainWindow):
         self.btnSearching.setIcon(icon)
         self.btnSearching.setFont(Font(11))
         self.btnSearching.setFixedHeight(30)
+        self.btnSearching.clicked.connect(partial(Controller.SearchFilter, self))
+        self.btnSearching.setAutoDefault(True)
         # layout horizontal
+        widget = QWidget()
+        widget.setFixedWidth(482)
         layoutH = QHBoxLayout()
         layoutH.addWidget(self.comboBox)
         layoutH.addWidget(self.textBox)
         layoutH.addWidget(self.btnSearching)
-        layoutH.setAlignment(Qt.AlignmentFlag.AlignLeft |
-                             Qt.AlignmentFlag.AlignVCenter)
+        layoutH.addWidget(widget)
+        layoutH.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         return layoutH
 
     # table
     def Table(self):
-        dataTable = QTableWidget(0, 3)
-        headers = ["Name", "Description", "Quantity"]
+        dataTable = QTableWidget(0, 4, self)
+        headers = ["id", "Name", "Description", "Quantity"]
         dataTable.setHorizontalHeaderLabels(headers)
         dataTable.horizontalHeader().setFont(FontBold())
-        dataTable.horizontalHeader().setSortIndicator(0, Qt.AscendingOrder)
         dataTable.setSortingEnabled(True)
+        dataTable.horizontalHeader().setSortIndicator(0, Qt.AscendingOrder)
         dataTable.verticalHeader().setVisible(False)
         dataTable.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        dataTable.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        dataTable.horizontalHeader().setStretchLastSection(True)
+        # width
+        dataTable.setFixedWidth(1000)
+        dataTable.setColumnWidth(0, 100)
+        dataTable.setColumnWidth(1, 300)
+        dataTable.setColumnWidth(2, 480)
+        dataTable.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        dataTable.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         return dataTable
 
     # button option
@@ -154,13 +174,31 @@ class Inventary(QMainWindow):
         btnGeneric.setLayout(layout)
         return btnGeneric
 
-    # data test
-    def _DataTest(self):
-        for i in range(3):
-            self.dataTable.insertRow(self.dataTable.rowCount())
-            self.dataTable.setItem(self.dataTable.rowCount(
-            ) - 1, 0, QTableWidgetItem("Item {}".format(self.dataTable.rowCount())))
-            self.dataTable.setItem(self.dataTable.rowCount(
-            ) - 1, 1, QTableWidgetItem("Description {}".format(self.dataTable.rowCount())))
-            self.dataTable.setItem(
-                self.dataTable.rowCount() - 1, 2, QTableWidgetItem("1"))
+    # open add/edit product
+    def OpenDialog(self, title : str, status: bool, name : str = None, description : str = None, id : int = None):
+        # instancia
+        self.dialog = Dialog(self, title, name, description)
+        self.dialog.btnDialog.button(
+            QDialogButtonBox.StandardButton.Save).clicked.connect(partial(
+                Controller.CreateUpdate, self.dialog, status, id
+            ))
+        self.dialog.exec()
+        Controller.LoadData(self.dataTable)
+
+    # get item for id
+    def GetItemSelected(self, status : bool = False):
+        # get id
+        if self.dataTable.selectedItems():
+            id = self.dataTable.selectedIndexes()[0].data()
+            name = self.dataTable.selectedIndexes()[1].data()
+            description = self.dataTable.selectedIndexes()[2].data()
+            if status:
+                self.OpenDialog("Edit Product", False, name, description, id)
+            else:
+                Controller.Delete(self, id)
+        else:
+            QMessageBox.warning(self,
+                                "Warning",
+                                "Please select the product to edit",
+                                QMessageBox.StandardButton.Ok)
+                    
