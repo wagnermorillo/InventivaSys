@@ -1,9 +1,9 @@
 from functools import partial
-from PySide6.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QPushButton, QHBoxLayout, QComboBox, QLineEdit, QTableWidget, QHeaderView, QAbstractItemView, QDialogButtonBox, QMessageBox, QSizePolicy 
+from PySide6.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QPushButton, QHBoxLayout, QComboBox, QLineEdit, QTableWidget, QAbstractItemView, QMessageBox 
 from PySide6.QtCore import QSize, Qt, QMargins, Signal
 from PySide6.QtGui import QIcon, QPalette, QColor, QFont
-from controllers.inventaryContr import Controller
-from .productDetails import Dialog
+from controllers.historyContr import Controller
+from .historyDetail import Dialog
 
 
 class Font(QFont):
@@ -19,7 +19,7 @@ class FontBold(QFont):
         self.setBold(True)
 
 # class of inventary window
-class Inventary(QMainWindow):
+class History(QMainWindow):
     # atributos para los signal
     openPrincipal = Signal()
 
@@ -40,24 +40,16 @@ class Inventary(QMainWindow):
         layoutV.addLayout(self.Searching())
         # dataTable
         self.dataTable = self.Table()
+        self.dataTable.cellDoubleClicked.connect(self.GetItemSelected)
         Controller.LoadData(self.dataTable)
         layoutV.addWidget(self.dataTable,
                           alignment=Qt.AlignmentFlag.AlignHCenter)
-        # layoutH for button
-        layoutH = QHBoxLayout()
-        # btnAdd
-        self.btnAdd = self._Button("Add Product", r"src/add.svg")
-        self.btnAdd.clicked.connect(partial(self.OpenDialog, "Add Product", True))
-        layoutH.addWidget(self.btnAdd)
-        # btnEdit
-        self.btnEdit = self._Button("Edit Product", r"src/edit.svg")
-        self.btnEdit.clicked.connect(partial(self.GetItemSelected, True))
-        layoutH.addWidget(self.btnEdit)
-        # btnDelete
-        self.btnDelete = self._Button("Delete Product", r"src/delete.svg")
-        self.btnDelete.clicked.connect(self.GetItemSelected)
-        layoutH.addWidget(self.btnDelete)
-        layoutV.addLayout(layoutH)
+        layoutV.addSpacing(10)
+        # btnDetail
+        self.btnDetail = self._Button("View Details", r"src/detail.svg")
+        self.btnDetail.clicked.connect(self.GetItemSelected)
+        layoutV.addWidget(self.btnDetail,
+                          alignment=Qt.AlignmentFlag.AlignHCenter)
         # btnExit
         self.btnExit = self._Button("Exit", r"src/exit.ico", 80, 80, 40)
         self.btnExit.clicked.connect(self.openPrincipal.emit)
@@ -71,7 +63,7 @@ class Inventary(QMainWindow):
     # label central
     def LabelCentral(self):
         # label
-        label = QLabel("Inventary")
+        label = QLabel("History")
         # modificar color
         palette = label.palette()
         palette.setColor(QPalette.WindowText, QColor("black"))
@@ -88,7 +80,7 @@ class Inventary(QMainWindow):
     def Searching(self):
         # combo
         self.comboBox = QComboBox()
-        self.comboBox.addItems(("id", "Name", "Description", "Quantity"))
+        self.comboBox.addItems(("id", "Comment"))
         self.comboBox.setEditable(False)
         self.comboBox.setInsertPolicy(QComboBox.NoInsert)
         self.comboBox.setFixedWidth(150)
@@ -109,8 +101,8 @@ class Inventary(QMainWindow):
         self.btnSearching.setIcon(icon)
         self.btnSearching.setFont(Font(11))
         self.btnSearching.setFixedHeight(30)
-        self.btnSearching.clicked.connect(partial(Controller.SearchFilter, self))
         self.btnSearching.setAutoDefault(True)
+        self.btnSearching.clicked.connect(partial(Controller.SearchFilter, self))
         # layout horizontal
         widget = QWidget()
         widget.setFixedWidth(482)
@@ -125,7 +117,7 @@ class Inventary(QMainWindow):
     # table
     def Table(self):
         dataTable = QTableWidget(0, 4, self)
-        headers = ["id", "Name", "Description", "Quantity"]
+        headers = ["id", "Type", "Comment", "Create at"]
         dataTable.setHorizontalHeaderLabels(headers)
         dataTable.horizontalHeader().setFont(FontBold())
         dataTable.setSortingEnabled(True)
@@ -137,7 +129,7 @@ class Inventary(QMainWindow):
         dataTable.setFixedWidth(1000)
         dataTable.setColumnWidth(0, 100)
         dataTable.setColumnWidth(1, 300)
-        dataTable.setColumnWidth(2, 480)
+        dataTable.setColumnWidth(2, 300)
         dataTable.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         dataTable.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         return dataTable
@@ -163,32 +155,17 @@ class Inventary(QMainWindow):
         layout.addWidget(label, 0, Qt.AlignmentFlag.AlignCenter)
         btnGeneric.setLayout(layout)
         return btnGeneric
-
-    # open add/edit product
-    def OpenDialog(self, title : str, status: bool, name : str = None, description : str = None, id : int = None):
-        # instancia
-        self.dialog = Dialog(self, title, name, description)
-        self.dialog.btnDialog.button(
-            QDialogButtonBox.StandardButton.Save).clicked.connect(partial(
-                Controller.CreateUpdate, self.dialog, status, id
-            ))
-        self.dialog.exec()
-        Controller.LoadData(self.dataTable)
-
+    
     # get item for id
-    def GetItemSelected(self, status : bool = False):
+    def GetItemSelected(self):
         # get id
         if self.dataTable.selectedItems():
             id = self.dataTable.selectedIndexes()[0].data()
-            name = self.dataTable.selectedIndexes()[1].data()
-            description = self.dataTable.selectedIndexes()[2].data()
-            if status:
-                self.OpenDialog("Edit Product", False, name, description, id)
-            else:
-                Controller.Delete(self, id)
+            self.dialog = Dialog(self)
+            Controller.LoadDataDetail(self.dialog.dataTable, id)
+            self.dialog.exec()
         else:
             QMessageBox.warning(self,
                                 "Warning",
-                                "Please select the product to edit",
+                                "Please select the record to view details",
                                 QMessageBox.StandardButton.Ok)
-                    

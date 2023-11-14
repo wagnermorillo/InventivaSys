@@ -16,6 +16,7 @@ class Principal(QMainWindow):
     openInventary = Signal()
     openInput = Signal()
     openOutput = Signal()
+    openHistory = Signal()
     openExit = Signal()
 
     # constructor
@@ -46,8 +47,10 @@ class Principal(QMainWindow):
         self.btnInventary = self._Button("Inventary", r"src/clipboard.svg", icon=90)
         self.btnInventary.clicked.connect(self.openInventary.emit)
         layout.addWidget(self.btnInventary,2,0)
-        # settings
-        layout.addWidget(self._Button("Settings", r"src/gear.ico"),2,1)
+        # btnHistory
+        self.btnHistory = self._Button("History", r"src/history.svg")
+        self.btnHistory.clicked.connect(self.openHistory.emit)
+        layout.addWidget(self.btnHistory,2,1)
         # vertical layout
         layoutV = QVBoxLayout()
         layoutV.addLayout(layout)

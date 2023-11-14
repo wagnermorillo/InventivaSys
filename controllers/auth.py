@@ -1,4 +1,6 @@
 from PySide6.QtWidgets import QMainWindow
+from models.models import User
+from models.db import session
 
 # controllers for login
 class Authetication:
@@ -14,9 +16,9 @@ class Authetication:
             obj.message.setVisible(True)
             obj.username.setFocus()
             return None
-        # example change future
-        if username == "admin" and password == "admin":
-            # login to login
+        auth = User.authenticate(session, username, password)
+        if auth:
+            # login to principal
             obj.openPrincipal.emit()
         else:
             obj.message.setText("Error incorrect username or password")

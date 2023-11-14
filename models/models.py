@@ -1,7 +1,9 @@
 from datetime import datetime
+from sqlite3 import IntegrityError
 from typing import Any, List, Type
 from sqlalchemy import ForeignKey, Integer, String, Column, func, Table
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
+import bcrypt
 
 # clase base
 class Base(DeclarativeBase):
@@ -27,6 +29,7 @@ class RecordProduct(Base):
             f"Product_id : {self.Product_id}, "
             f"Record_id : {self.Record_id}, "
             f"quantity: {self.quantity},"
+            f"product: {self.product}"
         )
 
 # Products
@@ -79,3 +82,34 @@ class Record(Base):
         self.type = type
         self.comment = comment
 
+# user
+class User(Base):
+    # nombre de la tabla
+    __tablename__ = "Users"
+    # columnas
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(String(255), unique=True)
+    password: Mapped[str] = mapped_column(String(255))
+
+    def __str__(self) -> str:
+        return (f"id : {self.id}"
+                f"username : {self.username}")
+
+    @classmethod
+    def create_user(cls, session, username, password):
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        user = cls(username=username, password=hashed_password.decode('utf-8'))
+        session.add(user)
+        try:
+            session.commit()
+            return user
+        except IntegrityError as e:
+            session.rollback()
+            return None
+        
+    @classmethod
+    def authenticate(cls, session, username, password):
+        user = session.query(cls).filter_by(username=username).first()
+        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+            return True
+        return False

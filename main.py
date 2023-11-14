@@ -5,6 +5,7 @@ from views.principal import Principal
 from views.inputOutput import Component
 from views.inventary import Inventary
 from views.login import Componente
+from views.history import History
 # controlador que se encarga de abrir y cerrar ventanas
 class App:
     def __init__(self) -> None:
@@ -27,9 +28,10 @@ class App:
         self.principal.openExit.connect(partial(self.PrincipalToExit, self.principal))
         self.principal.openInventary.connect(self.PrincipalToInventary)
         self.principal.openOutput.connect(self.PrincipalToOutput)
+        self.principal.openHistory.connect(self.PrincipalToHistory)
         self.principal.show()
         # esta
-        #self.login.close()
+        self.login.close()
         self.login = None
      
     ########################################
@@ -75,6 +77,14 @@ class App:
         self.principal.close()
         self.principal = None
     
+    # de principal a history
+    def PrincipalToHistory(self):
+        self.history = History()
+        self.history.openPrincipal.connect(self.HistoryToPrincipal)
+        self.history.show()
+        self.principal.close()
+        self.principal = None
+    
     ########################################
     #           inventary
     #########################################
@@ -85,6 +95,7 @@ class App:
         self.principal.openExit.connect(partial(self.PrincipalToExit, self.principal))
         self.principal.openInventary.connect(self.PrincipalToInventary)
         self.principal.openOutput.connect(self.PrincipalToOutput)
+        self.principal.openHistory.connect(self.PrincipalToHistory)
         self.principal.show()
         self.inventary.close()
         self.inventary = None
@@ -99,6 +110,7 @@ class App:
         self.principal.openExit.connect(partial(self.PrincipalToExit, self.principal))
         self.principal.openInventary.connect(self.PrincipalToInventary)
         self.principal.openOutput.connect(self.PrincipalToOutput)
+        self.principal.openHistory.connect(self.PrincipalToHistory)
         self.principal.show()
         self.input.close()
         self.input = None
@@ -113,13 +125,29 @@ class App:
         self.principal.openExit.connect(partial(self.PrincipalToExit, self.principal))
         self.principal.openInventary.connect(self.PrincipalToInventary)
         self.principal.openOutput.connect(self.PrincipalToOutput)
+        self.principal.openHistory.connect(self.PrincipalToHistory)
         self.principal.show()
         self.output.close()
         self.output = None
     
+    ########################################
+    #           history
+    #########################################
+    # history to principal
+    def HistoryToPrincipal(self):
+        self.principal = Principal()
+        self.principal.openInput.connect(self.PrincipalToInput)
+        self.principal.openExit.connect(partial(self.PrincipalToExit, self.principal))
+        self.principal.openInventary.connect(self.PrincipalToInventary)
+        self.principal.openOutput.connect(self.PrincipalToOutput)
+        self.principal.openHistory.connect(self.PrincipalToHistory)
+        self.principal.show()
+        self.history.close()
+        self.history = None
+    
     # run app
     def RunApp(self):
-        self.LoginToPrincipal()
+        self.OpenLogin()
         sys.exit(self.app.exec())
 
 # ejecutor de la aplicación
