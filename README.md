@@ -1,6 +1,6 @@
 # InventivaSys
 
-Aplicación de gestión de inventario adaptable para diversos tipos de negocios y empresas, sencillo con el cual puedes facilmente adminstar tu inventario y el historial de todo lo que ha ocurrido a lo largo del tiempo, añadir de ser intuitivo y amigable con el usuario.
+_Aplicación de gestión de inventario adaptable para diversos tipos de negocios y empresas, sencillo con el cual puedes facilmente adminstar tu inventario y el historial de todo lo que ha ocurrido a lo largo del tiempo, añadir de ser intuitivo y amigable con el usuario._
 
 ## Prerrequisitos 📋
 
@@ -18,8 +18,8 @@ _Antes de comenzar, asegúrate de tener instalados los siguientes requisitos:_
 ```
 pip install -r requirements.txt
 ```
-4. crear un archivo llamado `_.env_`, en el cual debes colocar los valores para tu conexión a DB, tomando de ejemplo el archivo `_.env.sample_`, asegurarte de que esta conexión sea valida.
-5. entrar a la carpeta de `_models_`, lo puedes hacer desde la dirección root con el comando:
+4. crear un archivo llamado `.env`, en el cual debes colocar los valores para tu conexión a DB, tomando de ejemplo el archivo `.env.sample`, asegurarte de que esta conexión sea valida.
+5. entrar a la carpeta de `models`, lo puedes hacer desde la dirección root con el comando:
 ```
 cd .\models\
 ```
@@ -30,9 +30,9 @@ alembic upgrade head
 
 ## Ejecutando ⚙️
 
-Para ejecutar el programa, necesitas regristrar un usuario para el login, para hacerlo luego de aplicar las migraciones, ejecutar el script con nombre `_CreateUser.py_`, creará un usuario de con user y password "admin".
+Para ejecutar el programa, necesitas regristrar un usuario para el login, para hacerlo luego de aplicar las migraciones, ejecutar el script con nombre `CreateUser.py`, creará un usuario de con user y password "admin".
 
-Ya con todo esto hecho lo unico que falta es ejectuar el fichero `main.py_`, y disfrutar de esta aplicación.
+Ya con todo esto hecho lo unico que falta es ejectuar el fichero `main.py`, y disfrutar de esta aplicación.
 
 ## Despliegue 📦
 
@@ -45,8 +45,16 @@ pyinstaller --onefile main.py
 ```
 3. disfruta de tu despligue a producción.
 
-## Preview
+## Construido con 🛠️
+Herramientas utilizadas para crear el proyecto:
 
-![Ejemplo de aplicación en uso](https://github.com/wagnermorillo/InventivaSys/blob/main/screenshot1.png)
-![Ejemplo de aplicación en uso](https://github.com/wagnermorillo/InventivaSys/blob/main/screenshot2.png)
-![Ejemplo de aplicación en uso](https://github.com/wagnermorillo/InventivaSys/blob/main/screenshot3.png)
+* [Python](https://www.python.org/) - Lenguaje de programación
+* [SQLalchemy](https://www.sqlalchemy.org/) - ORM para Python
+* [PostgreSQL](https://www.postgresql.org/) - Sistema de gestión de bases de datos
+* [Pyside6](https://pypi.org/project/PySide6/) - Biblioteca de interfaz gráfica para Python
+
+## Preview 🚀
+
+![Ejemplo de aplicación en uso](https://github.com/wagnermorillo/InventivaSys/blob/master/screenshot1.png)
+![Ejemplo de aplicación en uso](https://github.com/wagnermorillo/InventivaSys/blob/master/screenshot2.png)
+![Ejemplo de aplicación en uso](https://github.com/wagnermorillo/InventivaSys/blob/master/screenshot3.png)
