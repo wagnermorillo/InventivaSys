@@ -4,22 +4,12 @@ from PySide6.QtWidgets import QMainWindow, QMessageBox, QApplication
 from views.principal import Principal
 from views.inputOutput import Component
 from views.inventary import Inventary
-from views.login import Componente
 from views.history import History
 # controlador que se encarga de abrir y cerrar ventanas
 class App:
     def __init__(self) -> None:
         # atributos
         self.app = QApplication([])
-
-    ########################################
-    #           login
-    #########################################
-    # abiri el login
-    def OpenLogin(self):
-        self.login = Componente()
-        self.login.openPrincipal.connect(self.LoginToPrincipal)
-        self.login.show()
 
     # login to principal
     def LoginToPrincipal(self):
@@ -30,9 +20,6 @@ class App:
         self.principal.openOutput.connect(self.PrincipalToOutput)
         self.principal.openHistory.connect(self.PrincipalToHistory)
         self.principal.show()
-        # esta
-        self.login.close()
-        self.login = None
      
     ########################################
     #           principal
@@ -147,7 +134,7 @@ class App:
     
     # run app
     def RunApp(self):
-        self.OpenLogin()
+        self.LoginToPrincipal()
         sys.exit(self.app.exec())
 
 # ejecutor de la aplicación
